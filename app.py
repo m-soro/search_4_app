@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from vsearch import search_for_letters as sfl
 
 
@@ -12,4 +12,9 @@ def hello() -> str:
 def do_search() -> str:
     return str(sfl('alice in wonderland'))
 
+@app.route('/entry') # this creates a new URL to the webapp
+def entry_page() -> 'html':
+    return render_template('entry.html',
+            the_title='Welcome to search for letters website!')
+            # ^provides a value to associate with 'the_title' argument
 app.run()

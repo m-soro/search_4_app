@@ -1,0 +1,18 @@
+{% extends 'base.html' %} <!--using the jinja2 extends directive to inherit
+from body(like the html markups) it provides a replacement for the block "body"-->
+
+{% block body %}
+
+<h2>{{ the_title }}</h2>
+
+<form action="/search4" method="post">
+<table>
+    <p>Use this form to submit a search request:</p>
+    <tr><td>Prhrase:</td><td><input type="text" name="phrase"</td></tr>
+    <tr><td>Letters:</td><td><input type="text" name="letters" value="aeiou"</td></tr>
+</table>
+<p>When you're ready, click this button!</p>
+<p><input type="submit" value="Do it!"></p>
+</form>
+
+{% endblock %}

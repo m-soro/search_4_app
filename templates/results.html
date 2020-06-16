@@ -1,0 +1,18 @@
+{% extends 'base.html' %} <!--using the jinja2 extends directive to inherit
+from body(like the html markups) it provides a replacement for the block "body"-->
+
+{% block body %}
+
+<h2>{{ the_title }}</h2>
+<p>You submitted the following data:</p>
+<table>
+    <tr><td>Phrase:</td><td>{{ the_phrase }}</td></tr>
+    <tr><td>Letters:</td><td>{{ the_letters }}</td></tr>
+</table>
+
+<p>When "{{ the_phrase }}" is search for "{{ the_letters }}", the following
+results are returned:</p>
+<h3>{{ the_results }}</h3> <!--the_phrase, the_letters, the_results are values
+needed to be provided prior to rendering -->
+
+{%  endblock %}

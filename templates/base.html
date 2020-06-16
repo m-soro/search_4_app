@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+    <head>
+        <title>
+            {{ the_title }} <!--jinja2 directive, indicates that value will
+             be provided prior to rendering *acts as an {{argument}}*-->
+        </title>
+        <link rel="stylesheet" href="static/hf.css">
+    </head>
+    <body>
+        {% block body %} <!--indicates that a block of html here will be
+        substituted prior to rendering and is to be provided by any page that
+        inherits from this one-->
+
+        {% endblock %}  <!--indicates that a block of html here will be
+        substituted prior to rendering and is to be provided by any page that
+        inherits from this one-->
+    </body>
+</html>
