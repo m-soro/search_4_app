@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, escape
 # render_template -> when provided with the name...
 # of a template and any required arguments returns a string of html.
 # request -> provides us access to posted data from our html form
 # it has a dict attribute "form" and just like any old python dict
 # it supports bracket notation so we'll get the forms data like this...
 # request.form['phrases'] and request.form['letters'].
+# escape -> needed to translate html markup from the view_the_log function
 from vsearch import search_for_letters as sfl
 
 app = Flask(__name__)
@@ -30,7 +31,7 @@ def do_search() -> 'html': # annonating that this function returns html
     letters = request.form['letters'] # the form data.
     title = 'Here are your results:' # assign title
     results = str(sfl(phrase, letters)) # assign results
-    log_request(request,results) # calling the log_request function
+    log_request(request,results) # calling the log_request function.
     return  render_template('results.html', # don't forget the quote marks!
                                 the_phrase=phrase,
                                 the_letters=letters,
@@ -44,7 +45,15 @@ def entry_page() -> 'html': # annonating that this function returns html
     return render_template('entry.html',
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument.
-if__name__=='__main__':
+@app.route('/viewlog')
+def view_the_log() -> str: # will enable us to view the log, returns a string
+    with open('search.log') as log: # this opens/closes and reads the log
+        contents = log.read() # the read method returns the entire contents
+        return escape(contents) # of the file "in one go".
+        # enlosed the returned contents in escape to translate our markups
+
+
+if __name__ == '__main__':
     app.run(debug=True)
     # wrapping the app.run in dunder name dunder main...
     # let's us execute the code locally, and ...
