@@ -19,11 +19,19 @@ def hello() -> str:
     # methods is plural. Allows a web browser to send data to the server.
     # The @app.route accepts this as 2nd argument
     # this matches our POST method in the entry.html form section.
-def do_search() -> str:
+def do_search() -> 'html':
     phrase = request.form['phrase'] # using the request.form to access...
     letters = request.form['letters'] # the form data.
-    return str(sfl(phrase, letters)) # call the sfl method on phrase and letters.
-    # return str(sfl('alice in wonderland'))->removing the hardcoded string
+    title = 'Here are your results:' # assign title
+    results = str(sfl(phrase, letters)) # assign results
+    return  render_template('results.html', # don't forget the quote marks!
+                                the_phrase=phrase,
+                                the_letters=letters,
+                                the_title=title,
+                                the_results=results,)
+    # render_template is used to provide for the missing arguments in the
+    # results.html page which expects four arguments.
+
 
 @app.route('/entry') # this creates a new URL to the webapp
 def entry_page() -> 'html':
