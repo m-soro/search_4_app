@@ -8,7 +8,10 @@ app = Flask(__name__)
 def hello() -> str:
     return 'Hello world from Flask!'
 
-@app.route('/search4')
+@app.route('/search4', methods=['POST']) # POST methods notice that in Flask
+    # methods is plural. Allows a web browser to send data to the server.
+    # The @app.route accepts this as 2nd argument
+    # this matches our POST method in the entry.html form section.
 def do_search() -> str:
     return str(sfl('alice in wonderland'))
 
