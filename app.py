@@ -9,6 +9,18 @@ from vsearch import search_for_letters as sfl
 
 app = Flask(__name__)
 
+def log_request(req: 'flask_request', res: str) -> None:
+    # takes two arguments req and res, req is flask request, res is a string
+    # and this function returns none.
+    with open('search.log', 'a') as log:
+            print(req,res,file=log)
+    # this function allows us to write to 'search.log' file using...
+    # print() supplied with req, res and file=log as arguments.
+    # req is the current assigned Flask object request, which is...
+    # the request.form['phrase'] and request.form['letters']
+    # res if the result of str(sfl(phrase,letters)).
+    # then to invoke this function we'll add this to the do_search function.
+
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
     # The @app.route accepts this as 2nd argument
@@ -18,6 +30,7 @@ def do_search() -> 'html': # annonating that this function returns html
     letters = request.form['letters'] # the form data.
     title = 'Here are your results:' # assign title
     results = str(sfl(phrase, letters)) # assign results
+    log_request(request,results) # calling the log_request function
     return  render_template('results.html', # don't forget the quote marks!
                                 the_phrase=phrase,
                                 the_letters=letters,
@@ -31,5 +44,11 @@ def entry_page() -> 'html': # annonating that this function returns html
     return render_template('entry.html',
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument.
-app.run(debug=True) # debug True enables flask to restart the webapp every
+if__name__=='__main__':
+    app.run(debug=True)
+    # wrapping the app.run in dunder name dunder main...
+    # let's us execute the code locally, and ...
+    # we prevents us from having two versions of the code...
+    # because in deployment, app.run() will prevent the code from running...
+                    # debug True enables flask to restart the webapp every
                     # time it detects a change.
