@@ -1,23 +1,13 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request
 # render_template -> when provided with the name...
 # of a template and any required arguments returns a string of html.
 # request -> provides us access to posted data from our html form
 # it has a dict attribute "form" and just like any old python dict
 # it supports bracket notation so we'll get the forms data like this...
 # request.form['phrases'] and request.form['letters'].
-# redirect -> redirection capabilities from flask
-
 from vsearch import search_for_letters as sfl
 
-
 app = Flask(__name__)
-
-@app.route('/')
-def hello() -> '302': # annonating that this functions returns redirect
-    return redirect('/entry') # call to redirect an alternative URL...
-                # in this case '/entry'
-                # HTTP status codes from 300-399 are redirections
-                # 302 is what flask sends back to the brower when invoked
 
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
@@ -32,12 +22,10 @@ def do_search() -> 'html': # annonating that this function returns html
                                 the_phrase=phrase,
                                 the_letters=letters,
                                 the_title=title,
-                                the_results=results,)
+                                the_results=results)
     # render_template is used to provide for the missing arguments in the
     # results.html page which expects four arguments.
-
-
-
+@app.route('/') # the entry_page function now has two associated URL's!
 @app.route('/entry') # this creates a new URL to the webapp
 def entry_page() -> 'html': # annonating that this function returns html
     return render_template('entry.html',
