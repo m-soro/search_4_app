@@ -20,4 +20,5 @@ def entry_page() -> 'html':
     return render_template('entry.html',
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument
-app.run()
+app.run(debug=True) # debug True enables flask to restart the webapp every
+                    # time it detects a change.
