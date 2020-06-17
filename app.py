@@ -58,13 +58,13 @@ def entry_page() -> 'html': # annonating that this function returns html
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument.
 @app.route('/viewlog')
-def view_the_log() -> html: # will enable us to view the log, returns a html
+def view_the_log() -> 'html': # will enable us to view the log, returns a html
     contents = []
     with open('search.log') as log: # this opens/closes and reads the log
         for line in log:
             contents.append([])
-                for item in line.split('||'):
-                    contents[-1].append(escape(item))
+            for item in line.split('||'):
+                contents[-1].append(escape(item))
     titles = ('Form Data', 'Remote_addr', 'User_agent', 'Results') # table titles
     return render_template(viewlog.html, # call render_template in viewlog.html
                             the_title='View Log', # provide arguments to viewlog.html
