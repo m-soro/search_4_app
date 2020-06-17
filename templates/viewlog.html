@@ -1,0 +1,22 @@
+{% extends 'base.html' %} <!--inherits from the base template -->
+
+{% block body %}
+
+<h2>{{ the_title }}</h2>
+
+<table>
+    <tr>
+        {% for row_title in the_row_titles %} <!--no need ':'in jinja2 '%' is the delimiter -->
+            <th>{{ row_title }}</th>
+        {% endfor %} <!--end the loop like this. jinja2 does not support indentation -->
+    </tr>
+    {% for log_row in the_data %}
+        <tr>
+            {% for item in log rog_row %}
+                <td>{{ item }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
