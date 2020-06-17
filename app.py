@@ -60,8 +60,10 @@ def entry_page() -> 'html': # annonating that this function returns html
 @app.route('/viewlog')
 def view_the_log() -> str: # will enable us to view the log, returns a string
     with open('search.log') as log: # this opens/closes and reads the log
-        contents = log.read() # the read method returns the entire contents
-        return escape(contents) # of the file "in one go".
+        contents = log.readlines() # read all the lines of log data into a list
+    return escape(''.join(contents)) # takes the list of strings and join    
+         # contents = log.read() <-removed the read method returns the entire contents
+         # return escape(contents) <-removed of the file "in one go".
         # enlosed the returned contents in escape to translate our markups
 
 
