@@ -59,9 +59,15 @@ def entry_page() -> 'html': # annonating that this function returns html
             # ^provides a value to associate with 'the_title' argument.
 @app.route('/viewlog')
 def view_the_log() -> str: # will enable us to view the log, returns a string
+    contents = []
     with open('search.log') as log: # this opens/closes and reads the log
-        contents = log.readlines() # read all the lines of log data into a list
-    return escape(''.join(contents)) # takes the list of strings and join    
+        for line in log:
+            contents.append([])
+                for item in line.split('||'):
+                    contents[-1].append(escape(item))
+    return str(contents)
+        # contents = log.readlines() <- removed read all the lines of log data into a list
+    # return escape(''.join(contents))<- removed takes the list of strings and join
          # contents = log.read() <-removed the read method returns the entire contents
          # return escape(contents) <-removed of the file "in one go".
         # enlosed the returned contents in escape to translate our markups
