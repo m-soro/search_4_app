@@ -14,10 +14,7 @@ def log_request(req: 'flask_request', res: str) -> None:
     # takes two arguments req and res, req is flask request, res is a string
     # and this function returns none.
     with open('search.log', 'a') as log:
-            print(req.form, file=log, end='|')
-            print(req.remote_addr, file=log, end='|')
-            print(req.user_agent, file=log, end='|')
-            print(res,file=log)
+            print(req.form, req.remote_addr, req.user_agent, res, file=log, sep='||')
     # this function allows us to write to 'search.log' file using...
     # print() supplied with req, res and file=log as arguments.
     # req is the current assigned Flask object request, which is...
@@ -32,9 +29,11 @@ def log_request(req: 'flask_request', res: str) -> None:
     # 1)req.form-> data posted from HTML form, ...
     # 2)req.remote_addr-> the IP address of the web browser running on.
     # 3)req.user_agent -> the identity of the browser posting the data.
+    # removed and replaced with one line print statement -
     # instead of print(req.form, file=log) which will produce...
-    # extra new lines will pick a '|' as a delimiter using the end='|' attribute
-    # we'll add this three new objects to the log_request function.
+    # extra new lines will pick a '||' as a delimiter using the end='||' attribute
+    # ^removed and replaced with one line print statement^
+    #we'll add this three new objects to the log_request function.
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
     # The @app.route accepts this as 2nd argument
