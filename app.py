@@ -66,7 +66,7 @@ def view_the_log() -> 'html': # will enable us to view the log, returns a html
             for item in line.split('||'):
                 contents[-1].append(escape(item))
     titles = ('Form Data', 'Remote_addr', 'User_agent', 'Results') # table titles
-    return render_template(viewlog.html, # call render_template in viewlog.html
+    return render_template('viewlog.html', # call render_template in viewlog.html
                             the_title='View Log', # provide arguments to viewlog.html
                             row_title='titles',
                             the_data='contents')
