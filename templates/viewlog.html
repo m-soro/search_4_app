@@ -7,13 +7,13 @@
 <table>
     <tr>
         {% for row_title in the_row_titles %} <!--no need ':'in jinja2 '%' is the delimiter -->
-            <th>{{ row_title }}</th>
+            <th>{{row_title}}</th>
         {% endfor %} <!--end the loop like this. jinja2 does not support indentation -->
     </tr>
     {% for log_row in the_data %}
         <tr>
-            {% for item in log log_row %}
-                <td>{{ item }}</td>
+            {% for item in log_row %}
+                <td>{{item}}</td>
             {% endfor %}
         </tr>
     {% endfor %}
