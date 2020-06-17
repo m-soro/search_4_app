@@ -14,14 +14,17 @@ def log_request(req: 'flask_request', res: str) -> None:
     # takes two arguments req and res, req is flask request, res is a string
     # and this function returns none.
     with open('search.log', 'a') as log:
-            print(req,res,file=log)
+            print(str(dir(req)),res,file=log)
     # this function allows us to write to 'search.log' file using...
     # print() supplied with req, res and file=log as arguments.
     # req is the current assigned Flask object request, which is...
     # the request.form['phrase'] and request.form['letters']
     # res if the result of str(sfl(phrase,letters)).
     # then to invoke this function we'll add this to the do_search function.
-
+    # at the moment, the req is logging our request at object level...
+    # we are going to debug by passing the req to dir dir(req)...
+    # dir will produce a list and pass it to str to stringfy and then...
+    # save to logged file together with res.
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
     # The @app.route accepts this as 2nd argument
