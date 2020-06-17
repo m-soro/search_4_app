@@ -58,19 +58,24 @@ def entry_page() -> 'html': # annonating that this function returns html
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument.
 @app.route('/viewlog')
-def view_the_log() -> str: # will enable us to view the log, returns a string
+def view_the_log() -> html: # will enable us to view the log, returns a html
     contents = []
     with open('search.log') as log: # this opens/closes and reads the log
         for line in log:
             contents.append([])
                 for item in line.split('||'):
                     contents[-1].append(escape(item))
-    return str(contents)
-        # contents = log.readlines() <- removed read all the lines of log data into a list
+    titles = ('Form Data', 'Remote_addr', 'User_agent', 'Results') # table titles
+    return render_template(viewlog.html, # call render_template in viewlog.html
+                            the_title='View Log', # provide arguments to viewlog.html
+                            row_title='titles',
+                            the_data='contents')
+    # return str(contents) <- removed
+    # contents = log.readlines() <- removed read all the lines of log data into a list
     # return escape(''.join(contents))<- removed takes the list of strings and join
-         # contents = log.read() <-removed the read method returns the entire contents
-         # return escape(contents) <-removed of the file "in one go".
-        # enlosed the returned contents in escape to translate our markups
+    # contents = log.read() <-removed the read method returns the entire contents
+    # return escape(contents) <-removed of the file "in one go".
+    # enlosed the returned contents in escape to translate our markups
 
 
 if __name__ == '__main__':
