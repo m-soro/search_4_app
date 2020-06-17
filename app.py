@@ -68,8 +68,8 @@ def view_the_log() -> 'html': # will enable us to view the log, returns a html
     titles = ('Form Data', 'Remote_addr', 'User_agent', 'Results') # table titles
     return render_template('viewlog.html', # call render_template in viewlog.html
                             the_title='View Log', # provide arguments to viewlog.html
-                            row_title='titles',
-                            the_data='contents')
+                            row_title=titles,
+                            the_data=contents)
     # return str(contents) <- removed
     # contents = log.readlines() <- removed read all the lines of log data into a list
     # return escape(''.join(contents))<- removed takes the list of strings and join
