@@ -8,8 +8,16 @@ from flask import Flask, render_template, request, escape
 # escape -> needed to translate html markup from the view_the_log function
 from vsearch import search_for_letters as sfl
 
+from db_context_mgr import UseDatabase # imported our context manager module.
+
 app = Flask(__name__)
 
+# app.config is a built in configuration in Flask a dict that you can add values
+# and keys as needed.
+app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQL
+                          'user':'searchuser', # 2)user ID to use
+                          'password':'searchuserpwd', # 3)pwd asscociated with user ID to use
+                          'database':'searchlogDB',} # 4)database on interact with.
 # mySQL how to's
 # 1)enter mysql -> /usr/local/mysql -u root -p
 #   1.a)you will see "mysql>"
@@ -32,16 +40,8 @@ app = Flask(__name__)
 # 8)to exit -> quit
 
 # 1)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
-import mysql.connector
 def log_request(req: 'flask_request', res: str) -> None:
-    # Python's DB-API Steps:
-
-    # 2)define the connection to MySQL four needed infos are pkgd in a dictionary.
-    dbconfig = { 'host': '127.0.0.1', # 1)IP address/"host" running MySQL
-                 'user': 'searchuser', # 2)user ID to use
-                 'password': 'searchuserpwd', # 3)pwd asscociated with user ID to use
-                 'database': 'searchlogDB',}  # 4)database on interact with.
-
+    """log details of web request and the result"""
     # 3)establish connection to server, using "connect(pass here the connection dictionary)"
     #   3.a) the ** on connection dictionary expands the dictionary to four single arguments.
     conn = mysql.connector.connect(**dbconfig)
@@ -68,7 +68,7 @@ def log_request(req: 'flask_request', res: str) -> None:
     # 6)to check sql table
     #   6.a)refer to step 1.1.c
     #   6.b)type -> use 'subDataBaseName'
-    #   6.c)type -> select * from 'subTableName?'
+    #   6.c)type -> select * from 'subTableName'
 
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
