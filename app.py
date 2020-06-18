@@ -63,13 +63,12 @@ def log_request(req: 'flask_request', res: str) -> None:
                           req.user_agent.browser,
                           res,))
     conn.commit() # force write cached data
-    cursor.close()
-    conn.close()
-
+    cursor.close() # close cursor
+    conn.close() # close connector
     # 6)to check sql table
     #   6.a)refer to step 1.1.c
     #   6.b)type -> use 'subDataBaseName'
-    #   6.c)type -> select * from 'subTableName'  
+    #   6.c)type -> select * from 'subTableName?'
 
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
