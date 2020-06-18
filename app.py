@@ -10,30 +10,62 @@ from vsearch import search_for_letters as sfl
 
 app = Flask(__name__)
 
+# mySQL how to's
+# 1)enter mysql -> /usr/local/mysql -u root -p
+#   1.a)you will see "mysql>"
+#   1.b)always end all mysql command with ";"
+#   1.c)if mysql login has already been created -> /usr/local/mysql -u 'subUserName' -p *then type* 'subPwd'
+# 2)create database -> create database 'subDataBaseName'
+# 3)create userID and pwd -> create user 'subUserName' identified by 'subPwd'
+# 4)grant permission to access db -> grant all priviledges on subDataBaseName.* to 'subUserName'
+# 5)use the database -> use 'subDataBaseName'
+# 6)to create the table:
+#   6.a) create table 'subTableName' (
+#   6.b) -> id int auto_increment primary key,
+#   6.c) -> ts timestamp default current_timestamp,
+#   6.d) -> phrase varchar(128) not null,
+#   6.e) -> letters varchar(32) not null,
+#   6.f) -> ip varchar(16) not null,
+#   6.g) -> browser_string varchar(256) not null,
+#   6.h) -> results varchar(64) not null );
+# 7)confirm the created table -> describe log;
+# 8)to exit -> quit
 def log_request(req: 'flask_request', res: str) -> None:
-    # takes two arguments req and res, req is flask request, res is a string
-    # and this function returns none.
-    with open('search.log', 'a') as log:
-            print(req.form, req.remote_addr, req.user_agent, res, file=log, sep='||')
-    # this function allows us to write to 'search.log' file using...
-    # print() supplied with req, res and file=log as arguments.
-    # req is the current assigned Flask object request, which is...
-    # the request.form['phrase'] and request.form['letters']
-    # res if the result of str(sfl(phrase,letters)).
-    # then to invoke this function we'll add this to the do_search function.
-    # at the moment, the req is logging our request at object level...
-    # we are going to debug by passing the req to dir dir(req)...
-    # dir will produce a list and pass it to str to stringfy and then...
-    # save to logged file together with res.
-    # after running dir we picked up 3 things that we'll want to add to log
-    # 1)req.form-> data posted from HTML form, ...
-    # 2)req.remote_addr-> the IP address of the web browser running on.
-    # 3)req.user_agent -> the identity of the browser posting the data.
-    # removed and replaced with one line print statement -
-    # instead of print(req.form, file=log) which will produce...
-    # extra new lines will pick a '||' as a delimiter using the end='||' attribute
-    # ^removed and replaced with one line print statement^
-    #we'll add this three new objects to the log_request function.
+    # Python's DB-API Steps:
+
+    # 1)define the connection to MySQL four needed infos are pkgd in a dictionary.
+    dbconfig = { 'host': '127.0.0.1', # 1)IP address/"host" running MySQL
+                 'user': 'searchuser', # 2)user ID to use
+                 'password': 'searchuserpwd', # 3)pwd asscociated with user ID to use
+                 'database': 'searchlogDB',}  # 4)database on interact with.
+
+    # 2)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
+    import mysql.connector
+
+    # 3)establish connection to server, using "connect(pass here the connection dictionary)"
+    #   3.a) the ** on connection dictionary expands the dictionary to four single arguments.
+    conn = mysql.connector.connect(**dbconfig)
+
+    # 4)open a cursor whhich allows us to send sql commands and receive results.
+    cursor = conn.cursor()
+
+    # 5)assign the sql command to _SQL variable using insert command.
+    #   5.a)note that when using cursor.execute using insert query, the data
+    #       will be in cache and will be waiting to be written.
+    #   5.b)use conn.commit method to force write all cached data.
+    _SQL = """insert into log
+              (phrase, letters, ip, browser_string, results)
+              values
+              (%s, %s, %s, %s, %s)""" # %s acts as placeholders.
+    cursor.execute(_SQL, (req.form['phrase'],
+                          req.form['letters'],
+                          req.remote_addr,
+                          req.user_agent.browser,
+                          res,))
+    conn.commit() # force write cached data
+    cursor.close()
+    conn.close() 
+
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
     # The @app.route accepts this as 2nd argument
