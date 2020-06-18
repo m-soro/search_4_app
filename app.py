@@ -14,7 +14,7 @@ app = Flask(__name__)
 # 1)enter mysql -> /usr/local/mysql -u root -p
 #   1.a)you will see "mysql>"
 #   1.b)always end all mysql command with ";"
-#   1.c)if mysql login has already been created -> /usr/local/mysql -u 'subUserName' -p *then type* 'subPwd'
+#   1.c)if mysql login has already been created -> /usr/local/mysql/bin/mysql -u 'subUserName' -p *press enter then type* 'subPwd'
 # 2)create database -> create database 'subDataBaseName'
 # 3)create userID and pwd -> create user 'subUserName' identified by 'subPwd'
 # 4)grant permission to access db -> grant all priviledges on subDataBaseName.* to 'subUserName'
@@ -64,7 +64,12 @@ def log_request(req: 'flask_request', res: str) -> None:
                           res,))
     conn.commit() # force write cached data
     cursor.close()
-    conn.close() 
+    conn.close()
+
+    # 6)to check sql table
+    #   6.a)refer to step 1.1.c
+    #   6.b)type -> use 'subDataBaseName'
+    #   6.c)type -> select * from 'subTableName'  
 
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
     # methods is plural. Allows a web browser to send data to the server.
