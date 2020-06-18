@@ -1,2 +1,4 @@
 .DS_Store
 search.log
+__pycache__/
+__pycache__
