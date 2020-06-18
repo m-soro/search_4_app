@@ -30,17 +30,17 @@ app = Flask(__name__)
 #   6.h) -> results varchar(64) not null );
 # 7)confirm the created table -> describe log;
 # 8)to exit -> quit
+
+# 1)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
+import mysql.connector
 def log_request(req: 'flask_request', res: str) -> None:
     # Python's DB-API Steps:
 
-    # 1)define the connection to MySQL four needed infos are pkgd in a dictionary.
+    # 2)define the connection to MySQL four needed infos are pkgd in a dictionary.
     dbconfig = { 'host': '127.0.0.1', # 1)IP address/"host" running MySQL
                  'user': 'searchuser', # 2)user ID to use
                  'password': 'searchuserpwd', # 3)pwd asscociated with user ID to use
                  'database': 'searchlogDB',}  # 4)database on interact with.
-
-    # 2)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
-    import mysql.connector
 
     # 3)establish connection to server, using "connect(pass here the connection dictionary)"
     #   3.a) the ** on connection dictionary expands the dictionary to four single arguments.
