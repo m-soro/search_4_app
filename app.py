@@ -85,26 +85,30 @@ def entry_page() -> 'html': # annonating that this function returns html
     return render_template('entry.html',
             the_title='Welcome to search for letters website!')
             # ^provides a value to associate with 'the_title' argument.
-@app.route('/viewlog')
-def view_the_log() -> 'html': # funtion returns a html
-    contents = [] # create a new empty list
-    with open('search.log') as log: # reads the file and assigns the file stream to 'log'
-        for line in log: # loop thru each line in the log files stream
-            contents.append([]) # append new empty list to 'contents'
-            for item in line.split('||'): # split the line, then process each item ...
-                contents[-1].append(escape(item)) # in the resulting split list then append.
-    titles = ('Form Data', 'Remote_addr', 'User_agent', 'Results') # table titles
-    return render_template('viewlog.html', # call render_template in viewlog.html
-                            the_title='View Log', # provide arguments to viewlog.html
-                            the_row_titles=titles,
-                            the_data=contents)
-    # return str(contents) <- removed
-    # contents = log.readlines() <- removed read all the lines of log data into a list
-    # return escape(''.join(contents))<- removed takes the list of strings and join
-    # contents = log.read() <-removed the read method returns the entire contents
-    # return escape(contents) <-removed of the file "in one go".
-    # enlosed the returned contents in escape to translate our markups
 
+@app.route('/viewlog')
+def view_the_log() -> 'html': # function returns a html
+    with UseDatabase(app.config['dbconfig']) as cursor:
+    # instead of reading from the search.log text file, we are using...
+    # with UseDatabase(app.config['dbconfig']) as cursor:(which allows...
+    # us to send commands and receive results.)
+        _SQL = """select phrase, letters, ip, browser_string, results
+                    from log"""
+        # if you run this command in mysql> this displays all the above info.
+        cursor.execute(_SQL)
+        # pass the _SQL command to mysql and...
+        contents = cursor.fetchall()
+        # assign the results to contents using cursor.fetchall()
+        # you can ask for results from the cursor in 3 ways:
+            # 1) cursor.fetchone() -> retrieves a sinle row of results.
+            # 2) cursor.fetchmany() -> retrieves the number of row you specified.
+            # 3) cursor.fetchall() -> retrieves all the rows that make up the results.
+    titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
+    # ammended to include the phrase and letters instead of just one column -> form
+    return render_template('viewlog.html',
+                           'the_title'='View Log',
+                           'the_row_titles'='titles',
+                           'the_contents'='contents',)
 
 if __name__ == '__main__':
     app.run(debug=True)
