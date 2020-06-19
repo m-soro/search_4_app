@@ -45,18 +45,18 @@ def log_request(req: 'flask_request', res: str) -> None:
 
     with UseDatabase(app.config['dbconfig']) as cursor:
     # use the "with" together w/ UseDatabase passing in the app.config as cursor
-    _SQL = """insert into log
+        _SQL = """insert into log
               (phrase, letters, ip, browser_string, results)
               values
               (%s, %s, %s, %s, %s)""" # %s acts as placeholders.
-    cursor.execute(_SQL, (req.form['phrase'],
-                          req.form['letters'],
-                          req.remote_addr,
-                          req.user_agent.browser,
-                          res,))
-    conn.commit() # force write cached data
-    cursor.close() # close cursor
-    conn.close() # close connector
+        cursor.execute(_SQL, (req.form['phrase'],
+                              req.form['letters'],
+                              req.remote_addr,
+                              req.user_agent.browser,
+                              res,))
+    # conn.commit() # force write cached data -> not needed we have __exit__
+    # cursor.close() # close cursor -> not needed we have __exit__
+    # conn.close() # close connector -> not needed we have __exit__
     # 6)to check sql table
     #   6.a)refer to step 1.1.c
     #   6.b)type -> use 'subDataBaseName'
@@ -106,9 +106,9 @@ def view_the_log() -> 'html': # function returns a html
     titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
     # ammended to include the phrase and letters instead of just one column -> form
     return render_template('viewlog.html',
-                           'the_title'='View Log',
-                           'the_row_titles'='titles',
-                           'the_contents'='contents',)
+                           the_title='View Log',
+                           the_row_titles=titles,
+                           the_data=contents,)
 
 if __name__ == '__main__':
     app.run(debug=True)
