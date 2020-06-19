@@ -41,18 +41,10 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 
 # 1)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
 def log_request(req: 'flask_request', res: str) -> None:
-    """log details of web request and the result"""
-    # 3)establish connection to server, using "connect(pass here the connection dictionary)"
-    #   3.a) the ** on connection dictionary expands the dictionary to four single arguments.
-    conn = mysql.connector.connect(**dbconfig)
+    """log details of web request and the results."""
 
-    # 4)open a cursor whhich allows us to send sql commands and receive results.
-    cursor = conn.cursor()
-
-    # 5)assign the sql command to _SQL variable using insert command.
-    #   5.a)note that when using cursor.execute using insert query, the data
-    #       will be in cache and will be waiting to be written.
-    #   5.b)use conn.commit method to force write all cached data.
+    with UseDatabase(app.config['dbconfig']) as cursor:
+    # use the "with" together w/ UseDatabase passing in the app.config as cursor
     _SQL = """insert into log
               (phrase, letters, ip, browser_string, results)
               values
