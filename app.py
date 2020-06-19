@@ -12,8 +12,8 @@ from db_context_mgr import UseDatabase # imported our context manager module.
 
 app = Flask(__name__)
 
-# app.config is a built in configuration in Flask a dict that you can add values
-# and keys as needed.
+# app.config is a built in configuration in Flask, a dict that...
+# you can add values and keys as needed.
 app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQL
                           'user':'searchuser', # 2)user ID to use
                           'password':'searchuserpwd', # 3)pwd asscociated with user ID to use
@@ -37,14 +37,32 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 #   6.g) -> browser_string varchar(256) not null,
 #   6.h) -> results varchar(64) not null );
 # 7)confirm the created table -> describe log;
-# 8)to exit -> quit
+# 8)to check sql table
+#   8.a)refer to step 1.1.c
+#   8.b)type -> use 'subDataBaseName'
+#   8.c)type -> select * from 'subTableName'
+# 9)to exit -> quit
 
-# 1)import the database driver, makes the MySQL-specific driver available to Python's DB-API.
+# use mysql querries to answer database related questions...
+# 1) how many requests have been responded to?
+    # 1.1) select * from log;
+# 2) what's the most common list of letters?
+    # 2.1) select count(*) from log;
+# 3) what's the most common list of leters?
+    # 3.1) select count(letters) as 'count', letters from log
+    #      group by Letters
+    #      order by count desc
+    #      limit 1;
+# 4) which browser is being used the most?
+    # 4.1) select browser_string, count(browser_string) as 'count' from log
+    #      group by browser_string
+    #      order by count desc
+    #      limit 1;
+
 def log_request(req: 'flask_request', res: str) -> None:
     """log details of web request and the results."""
-
-    with UseDatabase(app.config['dbconfig']) as cursor:
     # use the "with" together w/ UseDatabase passing in the app.config as cursor
+    with UseDatabase(app.config['dbconfig']) as cursor:
         _SQL = """insert into log
               (phrase, letters, ip, browser_string, results)
               values
@@ -54,67 +72,69 @@ def log_request(req: 'flask_request', res: str) -> None:
                               req.remote_addr,
                               req.user_agent.browser,
                               res,))
-    # conn.commit() # force write cached data -> not needed we have __exit__
-    # cursor.close() # close cursor -> not needed we have __exit__
-    # conn.close() # close connector -> not needed we have __exit__
-    # 6)to check sql table
-    #   6.a)refer to step 1.1.c
-    #   6.b)type -> use 'subDataBaseName'
-    #   6.c)type -> select * from 'subTableName'
+
+    # conn.commit() # force write cached data -> not needed anymore b/c of __exit__
+    # cursor.close() # close cursor -> not needed anymore b/c of __exit__
+    # conn.close() # close connector -> not needed anymore b/c of __exit__
+    # this three commands are wrapped in __exit__ in db_context_mgr.py
 
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
-    # methods is plural. Allows a web browser to send data to the server.
-    # The @app.route accepts this as 2nd argument
-    # this matches our POST method in the entry.html form section.
+# methods is plural. Allows a web browser to send data to the server.
+# The @app.route accepts this as 2nd argument
+# this matches our POST method in the entry.html form section.
 def do_search() -> 'html': # annonating that this function returns html
     phrase = request.form['phrase'] # using the request.form to access...
     letters = request.form['letters'] # the form data.
-    title = 'Here are your results:' # assign title
-    results = str(sfl(phrase, letters)) # assign results
+    title = 'Here are your results:' # assign title on results.html page.
+    results = str(sfl(phrase, letters)) # assign results in string type.
     log_request(request,results) # calling the log_request function.
-    return  render_template('results.html', # don't forget the quote marks!
-                                the_phrase=phrase,
-                                the_letters=letters,
-                                the_title=title,
-                                the_results=results)
-    # render_template is used to provide for the missing arguments in the
+    # render_template is used to provide for the missing arguments in the ...
     # results.html page which expects four arguments.
-@app.route('/') # the entry_page function now has two associated URL's!
+    return  render_template('results.html', # don't forget the quote marks!
+                                the_phrase=phrase,      # 1
+                                the_letters=letters,    # 2
+                                the_title=title,        # 3
+                                the_results=results)    # 4
+
+@app.route('/') # the entry_page function now has two associated URL's! ('/') and ('/entry')
 @app.route('/entry') # this creates a new URL to the webapp
 def entry_page() -> 'html': # annonating that this function returns html
+    # render_template is used to provide for the missing argument in the ...
+    # entry.html page which expects one argument.
     return render_template('entry.html',
-            the_title='Welcome to search for letters website!')
-            # ^provides a value to associate with 'the_title' argument.
+            the_title='Welcome to search for letters website!') # 1
 
 @app.route('/viewlog')
 def view_the_log() -> 'html': # function returns a html
-    with UseDatabase(app.config['dbconfig']) as cursor:
     # instead of reading from the search.log text file, we are using...
     # with UseDatabase(app.config['dbconfig']) as cursor:(which allows...
     # us to send commands and receive results.)
+    with UseDatabase(app.config['dbconfig']) as cursor:
+        # if you run this command in mysql> this displays all the below info.
         _SQL = """select phrase, letters, ip, browser_string, results
                     from log"""
-        # if you run this command in mysql> this displays all the above info.
-        cursor.execute(_SQL)
         # pass the _SQL command to mysql and...
-        contents = cursor.fetchall()
+        cursor.execute(_SQL)
         # assign the results to contents using cursor.fetchall()
         # you can ask for results from the cursor in 3 ways:
             # 1) cursor.fetchone() -> retrieves a sinle row of results.
             # 2) cursor.fetchmany() -> retrieves the number of row you specified.
             # 3) cursor.fetchall() -> retrieves all the rows that make up the results.
-    titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
+        contents = cursor.fetchall()
     # ammended to include the phrase and letters instead of just one column -> form
+    titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
+    # render_template is used to provide for the missing arguments in the ...
+    # viewlog.html page which expects three arguments.
     return render_template('viewlog.html',
-                           the_title='View Log',
-                           the_row_titles=titles,
-                           the_data=contents,)
+                           the_title='View Log',        # 1
+                           the_row_titles=titles,       # 2
+                           the_data=contents,)          # 3
 
 if __name__ == '__main__':
     app.run(debug=True)
     # wrapping the app.run in dunder name dunder main...
     # let's us execute the code locally, and ...
-    # we prevents us from having two versions of the code...
+    # prevents us from having two versions of the code...
     # because in deployment, app.run() will prevent the code from running...
                     # debug True enables flask to restart the webapp every
                     # time it detects a change.
