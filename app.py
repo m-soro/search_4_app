@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, escape
+from flask import Flask, render_template, request, escape, session
 # render_template -> when provided with the name...
 # of a template and any required arguments returns a string of html.
 # request -> provides us access to posted data from our html form
@@ -8,9 +8,13 @@ from flask import Flask, render_template, request, escape
 # escape -> needed to translate html markup from the view_the_log function
 from vsearch import search_for_letters as sfl
 
+from checker import check_logged_in
+
 from db_context_mgr import UseDatabase # imported our context manager module.
 
 app = Flask(__name__)
+
+app.secret_key = 'anotherhardtoguesskey'
 
 # app.config is a built in configuration in Flask, a dict that...
 # you can add values and keys as needed.
@@ -105,6 +109,7 @@ def entry_page() -> 'html': # annonating that this function returns html
             the_title='Welcome to search for letters website!') # 1
 
 @app.route('/viewlog')
+@check_logged_in # check if user is logged in using our created checker module
 def view_the_log() -> 'html': # function returns a html
     # instead of reading from the search.log text file, we are using...
     # with UseDatabase(app.config['dbconfig']) as cursor:(which allows...
@@ -129,6 +134,24 @@ def view_the_log() -> 'html': # function returns a html
                            the_title='View Log',        # 1
                            the_row_titles=titles,       # 2
                            the_data=contents,)          # 3
+
+@app.route('/login')
+def do_login():
+    session['logged_in'] = True
+    # we are setting the session's dictionary key which is 'logged_in' to True
+    return render_template('login.html',
+                            the_message="You are now logged IN.")
+    # return a message to confirm we're logged IN.
+
+@app.route('/logout')
+def do_logout():
+    del session['logged_in']
+    # the recommended way of logging out is removing the key instead of ...
+    # just setting the key to True.
+    return render_template('logout.html',
+                            the_message="You are now logged OUT.")
+    # return a message to confirm we're logged OUT.
+
 
 if __name__ == '__main__':
     app.run(debug=True)
