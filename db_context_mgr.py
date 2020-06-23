@@ -34,9 +34,10 @@ class UseDatabase: # create class using class keyword and CamelCase style
             # return the cursor
             return self.cursor
         except mysql.connector.errors.InterfaceError as err:
-        # use the full name of the backend specifi exception.
+        # catch the error.
+        # use the full name of the backend specific exception (mysql.connector.errors.InterfaceError).
             raise ConnectionError(err)
-            # raise the custom exception. 
+            # raise the custom exception.
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         # annotation in method indicates this returns no value
         # exception handlers are passed in as arguments.
