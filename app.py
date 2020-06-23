@@ -74,7 +74,7 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 #                 -> Here we're guarding for:
 #                               InterfaceError w/c is database connection error and ...
 #                               ProgrammingError w/c occurs in incorrect SQL querry or...
-#                                                incorrect credentials. 
+#                                                incorrect credentials.
 
 def log_request(req: 'flask_request', res: str) -> None:
     # raise Exception('Something awful just happened.') -> generates a custom error message.
@@ -136,7 +136,7 @@ def view_the_log() -> 'html': # function returns a html
     try:
         with UseDatabase(app.config['dbconfig']) as cursor:
             # if you run this command in mysql> this displays all the below info.
-            _SQL = """selectwrong phrase, letters, ip, browser_string, results
+            _SQL = """select phrase, letters, ip, browser_string, results
                     from log"""
                     # pass the _SQL command to mysql and...
             cursor.execute(_SQL)
@@ -170,12 +170,12 @@ def view_the_log() -> 'html': # function returns a html
         # to look for ProgrammingError which occurs when SQL commands has errors.
         print(f'*-*-*-*-*-* Is your qerry correct?  {str(err)}*-*-*-*-*-*')
         # print our error message for our internal error message.
-
     except Exception as err:
         # let's also define the catch-all exception and...
         print(f'*-*-*-*-*-* Logging this error as: {str(err)}*-*-*-*-*-*')
         # print our error message for our internal error message
-    return 'Oops... Something\'s gone wrong...'
+    return render_template('viewlog.html',
+                        error_mess = 'Oops... Something\'s gone wrong...')
         # return the visible part of the error message instead of the...
         # scary looking error message.
 
