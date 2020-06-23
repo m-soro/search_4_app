@@ -12,6 +12,8 @@ from checker import check_logged_in
 
 from db_context_mgr import UseDatabase # imported our context manager module.
 
+from time import sleep
+
 app = Flask(__name__)
 
 app.secret_key = 'anotherhardtoguesskey'
@@ -63,9 +65,17 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
     #      order by count desc
     #      limit 1;
 
+# protecting exception prone codes:
+# 1) do_search -> interacts w/ database so we added a try/except block to handle exceptions.
+# 2) view_the_log -> interacts w/ database as well, however Flask invokes this code...
+#                    not us.
+
 def log_request(req: 'flask_request', res: str) -> None:
+    # raise Exception('Something awful just happened.') -> generates a custom error message
     """log details of web request and the results."""
     # use the "with" together w/ UseDatabase passing in the app.config as cursor
+    # sleep(15) # mimicking slow interaction to database.
+    # raise # forces a runtime error
     with UseDatabase(app.config['dbconfig']) as cursor:
         _SQL = """insert into log
               (phrase, letters, ip, browser_string, results)
@@ -91,7 +101,10 @@ def do_search() -> 'html': # annonating that this function returns html
     letters = request.form['letters'] # the form data.
     title = 'Here are your results:' # assign title on results.html page.
     results = str(sfl(phrase, letters)) # assign results in string type.
-    log_request(request,results) # calling the log_request function.
+    try: # protecting this block of code in case connection to database is unavailable.
+        log_request(request,results) # calling the log_request function.
+    except Exception as err: # a catch-all exception, print exception as friendly string.
+        print(f'*-*-*-*-*-* Logging failed with this error: {(str(err))} *-*-*-*-*-*')
     # render_template is used to provide for the missing arguments in the ...
     # results.html page which expects four arguments.
     return  render_template('results.html', # don't forget the quote marks!
