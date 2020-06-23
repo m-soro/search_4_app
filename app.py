@@ -10,7 +10,9 @@ from vsearch import search_for_letters as sfl
 
 from checker import check_logged_in
 
-from db_context_mgr import UseDatabase # imported our context manager module.
+from db_context_mgr import UseDatabase, ConnectionError
+ # imported our context manager module, we have two classes that we created...
+ # inside it UseDatabase and ConnectionError.
 
 from time import sleep
 
@@ -23,7 +25,7 @@ app.secret_key = 'anotherhardtoguesskey'
 app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQL
                           'user':'searchuser', # 2)user ID to use
                           'password':'searchuserpwd', # 3)pwd asscociated with user ID to use
-                          'database':'searchlogDB',} # 4)database on interact with.
+                          'database':'searchlogDBwrong',} # 4)database on interact with.
 # mySQL how to's
 # 1)enter mysql -> /usr/local/mysql -u root -p
 #   1.a)you will see "mysql>"
@@ -71,7 +73,7 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 #                    not us.
 
 def log_request(req: 'flask_request', res: str) -> None:
-    # raise Exception('Something awful just happened.') -> generates a custom error message
+    # raise Exception('Something awful just happened.') -> generates a custom error message.
     """log details of web request and the results."""
     # use the "with" together w/ UseDatabase passing in the app.config as cursor
     # sleep(15) # mimicking slow interaction to database.
@@ -127,26 +129,40 @@ def view_the_log() -> 'html': # function returns a html
     # instead of reading from the search.log text file, we are using...
     # with UseDatabase(app.config['dbconfig']) as cursor:(which allows...
     # us to send commands and receive results.)
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        # if you run this command in mysql> this displays all the below info.
-        _SQL = """select phrase, letters, ip, browser_string, results
+    try:
+        with UseDatabase(app.config['dbconfig']) as cursor:
+            # if you run this command in mysql> this displays all the below info.
+            _SQL = """select phrase, letters, ip, browser_string, results
                     from log"""
-        # pass the _SQL command to mysql and...
-        cursor.execute(_SQL)
-        # assign the results to contents using cursor.fetchall()
-        # you can ask for results from the cursor in 3 ways:
+                    # pass the _SQL command to mysql and...
+            cursor.execute(_SQL)
+            # assign the results to contents using cursor.fetchall()
+            # you can ask for results from the cursor in 3 ways:
             # 1) cursor.fetchone() -> retrieves a sinle row of results.
             # 2) cursor.fetchmany() -> retrieves the number of row you specified.
             # 3) cursor.fetchall() -> retrieves all the rows that make up the results.
-        contents = cursor.fetchall()
-    # ammended to include the phrase and letters instead of just one column -> form
-    titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
-    # render_template is used to provide for the missing arguments in the ...
-    # viewlog.html page which expects three arguments.
-    return render_template('viewlog.html',
-                           the_title='View Log',        # 1
-                           the_row_titles=titles,       # 2
-                           the_data=contents,)          # 3
+            contents = cursor.fetchall()
+            # ammended to include the phrase and letters instead of just one column -> form
+            titles = ('Phrase','Letters','Remote_addr','User_agent','Results')
+            # render_template is used to provide for the missing arguments in the ...
+            # viewlog.html page which expects three arguments.
+            return render_template('viewlog.html',
+                                    the_title='View Log',        # 1
+                                    the_row_titles=titles,       # 2
+                                    the_data=contents,)          # 3
+
+    except ConnectionError as err:
+        # in ConnectionError we specifically instructed the exception handler...
+        # look for InterfaceError which occurs when connection to database fails.
+        print(f'*-*-*-*-*-* Double check your database connection: {str(err)}*-*-*-*-*-*')
+        # print our error message for our internal error message
+    except Exception as err:
+        # let's also define the catch-all exception and...
+        print(f'*-*-*-*-*-* Logging this error as: {str(err)}*-*-*-*-*-*')
+        # print our error message for our internal error message
+    return 'Oops... Something\'s gone wrong...'
+        # return the visible part of the error message instead of the...
+        # scary looking error message.
 
 @app.route('/login')
 def do_login():
