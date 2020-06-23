@@ -10,10 +10,12 @@ class ConnectionError(Exception):
     pass # no code needed here. pass.
 
 class CredentialsError(Exception): # let's guard for wrong credentials.
-    pass                           # produces a ProgrammingError
+    pass                           # produces a ProgrammingError...
+                                   # note that this errors occurs in __enter__.
 
 class SQLError(Exception): # let's guard for incorrect SQL commands
     pass                   # produces a ProgrammingError
+                           # note that this error occurs in __exit__.
 
 class UseDatabase: # create class using class keyword and CamelCase style
 # to use the "with" statement we need to create a class with:
@@ -62,4 +64,4 @@ class UseDatabase: # create class using class keyword and CamelCase style
         elif exc_type:
         # to catch any other exception thrown in at __exit__.
             raise SQLError(exc_value)
-            # raise the error.      
+            # raise the error.
