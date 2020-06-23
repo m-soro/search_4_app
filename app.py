@@ -9,12 +9,11 @@ from flask import Flask, render_template, request, escape, session
 from vsearch import search_for_letters as sfl
 
 from checker import check_logged_in
+# imported checker module which checks if user is log in or logged out.
 
-from db_context_mgr import UseDatabase, ConnectionError
- # imported our context manager module, we have two classes that we created...
- # inside it UseDatabase and ConnectionError.
-
-from time import sleep
+from db_context_mgr import UseDatabase, ConnectionError, CredentialsError, SQLError
+ # imported our context manager module, we have four classes that we created...
+ # 1) UseDatabase   2)ConnectionError   3)CredentialsError  4) SQLError
 
 app = Flask(__name__)
 
@@ -25,7 +24,7 @@ app.secret_key = 'anotherhardtoguesskey'
 app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQL
                           'user':'searchuser', # 2)user ID to use
                           'password':'searchuserpwd', # 3)pwd asscociated with user ID to use
-                          'database':'searchlogDBwrong',} # 4)database on interact with.
+                          'database':'searchlogDB',} # 4)database on interact with.
 # mySQL how to's
 # 1)enter mysql -> /usr/local/mysql -u root -p
 #   1.a)you will see "mysql>"
@@ -67,10 +66,15 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
     #      order by count desc
     #      limit 1;
 
-# protecting exception prone codes:
+# protecting codes using try/except blocks using classes in db_context_mgr module.:
 # 1) do_search -> interacts w/ database so we added a try/except block to handle exceptions.
-# 2) view_the_log -> interacts w/ database as well, however Flask invokes this code...
-#                    not us.
+# 2) view_the_log -> interacts w/ database as well, however Flask invokes this code not us...
+#                    which means we'll define this exception handler inside the db_context_mgr module
+#                    and to avoid coupling of our code to back end database.
+#                 -> Here we're guarding for:
+#                               InterfaceError w/c is database connection error and ...
+#                               ProgrammingError w/c occurs in incorrect SQL querry or...
+#                                                incorrect credentials. 
 
 def log_request(req: 'flask_request', res: str) -> None:
     # raise Exception('Something awful just happened.') -> generates a custom error message.
@@ -106,7 +110,7 @@ def do_search() -> 'html': # annonating that this function returns html
     try: # protecting this block of code in case connection to database is unavailable.
         log_request(request,results) # calling the log_request function.
     except Exception as err: # a catch-all exception, print exception as friendly string.
-        print(f'*-*-*-*-*-* Logging failed with this error: {(str(err))} *-*-*-*-*-*')
+        print(f'*-*-*-*-*-* Logging exception with this error: {(str(err))} *-*-*-*-*-*')
     # render_template is used to provide for the missing arguments in the ...
     # results.html page which expects four arguments.
     return  render_template('results.html', # don't forget the quote marks!
@@ -132,7 +136,7 @@ def view_the_log() -> 'html': # function returns a html
     try:
         with UseDatabase(app.config['dbconfig']) as cursor:
             # if you run this command in mysql> this displays all the below info.
-            _SQL = """select phrase, letters, ip, browser_string, results
+            _SQL = """selectwrong phrase, letters, ip, browser_string, results
                     from log"""
                     # pass the _SQL command to mysql and...
             cursor.execute(_SQL)
@@ -153,9 +157,20 @@ def view_the_log() -> 'html': # function returns a html
 
     except ConnectionError as err:
         # in ConnectionError we specifically instructed the exception handler...
-        # look for InterfaceError which occurs when connection to database fails.
-        print(f'*-*-*-*-*-* Double check your database connection: {str(err)}*-*-*-*-*-*')
-        # print our error message for our internal error message
+        # to look for InterfaceError which occurs when connection to database fails.
+        print(f'*-*-*-*-*-* Did check your database connection? {str(err)}*-*-*-*-*-*')
+        # print our error message for our internal error message.
+    except CredentialsError as err:
+        # in CredentialsError we specifically instructed the exception handler...
+        # to look for ProgrammingError which occurs when database credentials are incorrect.
+        print(f'*-*-*-*-*-* Did you check your username and password? {str(err)}*-*-*-*-*-*')
+        # print our error message for our internal error message.
+    except SQLError as err:
+        # in SQLError we specifically instructed the exception handler...
+        # to look for ProgrammingError which occurs when SQL commands has errors.
+        print(f'*-*-*-*-*-* Is your qerry correct?  {str(err)}*-*-*-*-*-*')
+        # print our error message for our internal error message.
+
     except Exception as err:
         # let's also define the catch-all exception and...
         print(f'*-*-*-*-*-* Logging this error as: {str(err)}*-*-*-*-*-*')
