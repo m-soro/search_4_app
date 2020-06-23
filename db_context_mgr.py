@@ -1,5 +1,16 @@
 import mysql.connector
 
+class ConnectionError(Exception):
+# create an exception handler class here in database context manager module,
+# instead of handling the exceptions for view_the_log code block itself, which means
+# needing to import the mysql connection and avoiding coupling of backend database.
+# we'll add try and except block to protect our __enter__ code block.
+# we're passing in the Exception which means all attributes and behaviors...
+# of exception is available to Connection Error.
+    pass
+    # no code needed here. pass.
+
+
 class UseDatabase: # create class using class keyword and CamelCase style
 # to use the "with" statement we need to create a class with:
 # 1) __init__ method to perform initialization(optional)
@@ -16,12 +27,16 @@ class UseDatabase: # create class using class keyword and CamelCase style
     def __enter__(self) -> 'cursor': # annotation says this returns a cursor
         # __enter__ method onlt take self as argument.
         # establish connector to the server(note ** on self.configuration)
-        self.conn = mysql.connector.connect(**self.configuration)
-        # establish cursor to connector
-        self.cursor = self.conn.cursor()
-        # return the cursor
-        return self.cursor
-
+        try: # protect the code with try.
+            self.conn = mysql.connector.connect(**self.configuration)
+            # establish cursor to connector
+            self.cursor = self.conn.cursor()
+            # return the cursor
+            return self.cursor
+        except mysql.connector.errors.InterfaceError as err:
+        # use the full name of the backend specifi exception.
+            raise ConnectionError(err)
+            # raise the custom exception. 
     def __exit__(self, exc_type, exc_value, exc_trace) -> None:
         # annotation in method indicates this returns no value
         # exception handlers are passed in as arguments.
