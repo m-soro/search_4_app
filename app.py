@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, escape, session
+from flask import Flask, render_template, request, escape, session, copy_current_request_context
 # render_template -> when provided with the name...
 # of a template and any required arguments returns a string of html.
 # request -> provides us access to posted data from our html form
@@ -6,18 +6,23 @@ from flask import Flask, render_template, request, escape, session
 # it supports bracket notation so we'll get the forms data like this...
 # request.form['phrases'] and request.form['letters'].
 # escape -> needed to translate html markup from the view_the_log function
+# copy_current_request_context -> ensures that we have a copy of the created request context...
+#                                  and will be available when the function is called.
 from vsearch import search_for_letters as sfl
 
 from checker import check_logged_in
-# imported checker module which checks if user is log in or logged out.
+# imported checker library which checks if user is log in or logged out.
+
+from threading import Thread
+# imported the threading library to use Thread to run our code concurrently.
+
+# from time import sleep # used to simulate slow connection.
 
 from db_context_mgr import UseDatabase, ConnectionError, CredentialsError, SQLError
  # imported our context manager module, we have four classes that we created...
  # 1) UseDatabase   2)ConnectionError   3)CredentialsError  4) SQLError
 
 app = Flask(__name__)
-
-app.secret_key = 'anotherhardtoguesskey'
 
 # app.config is a built in configuration in Flask, a dict that...
 # you can add values and keys as needed.
@@ -67,7 +72,8 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
     #      limit 1;
 
 # protecting codes using try/except blocks using classes in db_context_mgr module.:
-# 1) do_search -> interacts w/ database so we added a try/except block to handle exceptions.
+# 1) do_search -> interacts w/ database so we added a try/except block to handle exceptions and...
+#              -> nested inside is the log_request which writes on our back end database.
 # 2) view_the_log -> interacts w/ database as well, however Flask invokes this code not us...
 #                    which means we'll define this exception handler inside the db_context_mgr module
 #                    and to avoid coupling of our code to back end database.
@@ -76,39 +82,43 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 #                               ProgrammingError w/c occurs in incorrect SQL querry or...
 #                                                incorrect credentials.
 
-def log_request(req: 'flask_request', res: str) -> None:
-    # raise Exception('Something awful just happened.') -> generates a custom error message.
-    """log details of web request and the results."""
-    # use the "with" together w/ UseDatabase passing in the app.config as cursor
-    # sleep(15) # mimicking slow interaction to database.
-    # raise # forces a runtime error
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        _SQL = """insert into log
-              (phrase, letters, ip, browser_string, results)
-              values
-              (%s, %s, %s, %s, %s)""" # %s acts as placeholders.
-        cursor.execute(_SQL, (req.form['phrase'],
-                              req.form['letters'],
-                              req.remote_addr,
-                              req.user_agent.browser,
-                              res,))
-
-    # conn.commit() # force write cached data -> not needed anymore b/c of __exit__
-    # cursor.close() # close cursor -> not needed anymore b/c of __exit__
-    # conn.close() # close connector -> not needed anymore b/c of __exit__
-    # this three commands are wrapped in __exit__ in db_context_mgr.py
-
 @app.route('/search4', methods=['POST']) # POST methods notice that in Flask
 # methods is plural. Allows a web browser to send data to the server.
 # The @app.route accepts this as 2nd argument
 # this matches our POST method in the entry.html form section.
 def do_search() -> 'html': # annonating that this function returns html
+    """retrieves the request from web which will be passed to
+        log request function to be written in database"""
     phrase = request.form['phrase'] # using the request.form to access...
     letters = request.form['letters'] # the form data.
     title = 'Here are your results:' # assign title on results.html page.
     results = str(sfl(phrase, letters)) # assign results in string type.
+    try:
+        @copy_current_request_context # -> ensures that HTTP request remains active even....
+                                      # after a function is subsequently executed in thread.
+        def log_request(req: 'flask_request', res: str) -> None: # moved from the top.
+            """log details of web request and the results."""
+            # use the "with" together w/ UseDatabase passing in the app.config as cursor
+            # sleep(15) # mimicking slow interaction to database.
+            with UseDatabase(app.config['dbconfig']) as cursor:
+                    _SQL = """insert into log
+                    (phrase, letters, ip, browser_string, results)
+                    values
+                    (%s, %s, %s, %s, %s)""" # %s acts as placeholders.
+                    cursor.execute(_SQL, (req.form['phrase'],
+                                    req.form['letters'],
+                                    req.remote_addr,
+                                    req.user_agent.browser,
+                                    res,))
+    except Exception as err:
+          print(f'*-*-*-*-*-* Logging exception with this error: {(str(err))} *-*-*-*-*-*')
+
     try: # protecting this block of code in case connection to database is unavailable.
-        log_request(request,results) # calling the log_request function.
+        t = Thread(target=log_request, args=(request,results))
+        # wrapping log_request function in Thread object to avoid waiting for writing...
+        # in database.
+        t.start()
+        # calling the log_request function.
     except Exception as err: # a catch-all exception, print exception as friendly string.
         print(f'*-*-*-*-*-* Logging exception with this error: {(str(err))} *-*-*-*-*-*')
     # render_template is used to provide for the missing arguments in the ...
@@ -196,6 +206,7 @@ def do_logout():
                             the_message="You are now logged OUT.")
     # return a message to confirm we're logged OUT.
 
+app.secret_key = 'anotherhardtoguesskey'
 
 if __name__ == '__main__':
     app.run(debug=True)
