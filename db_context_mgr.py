@@ -57,7 +57,7 @@ class UseDatabase: # create class using class keyword and CamelCase style
         self.cursor.close() # close the cursor
         self.conn.close() # close the connector
         if exc_type is mysql.connector.ProgrammingError:
-        # let's put to work the exception handlers.
+        # let's put to work the exception handlers, only if its ProgrammingError.
         # exc_type for type of execptions and exc_value for exception's value.
             raise SQLError(exc_value)
             # raise the error.
