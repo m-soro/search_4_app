@@ -3,16 +3,33 @@ from body(like the html markups) it provides a replacement for the block "body"-
 
 {% block body %}
 
-<h2>{{ the_title }}</h2>
+<h2 class="animate__animated animate__flipInX">{{ the_title }}</h2>
 
+<!--
 <form action="/search4" method="post">
 <table>
     <p>Use this form to submit a search request:</p>
-    <tr><td>Phrase:</td><td><input type="text" name="phrase"</td></tr>
-    <tr><td>Letters:</td><td><input type="text" name="letters" value=""</td></tr>
+    <tr><td>Phrase:</td><td><input type="text" name="phrase"></td></tr>
+    <tr><td>Letters:</td><td><input type="text" name="letters" value=""></td></tr>
 </table>
 <p>When you're ready, click this button!</p>
-<p><input type="submit" value="Do it!"></p>
+<p><button type="submit" class="btn btn-outline-primary">Do it!</button>
 </form>
+-->
+
+<p>Use this form to submit a search request:</p>
+<form action="/search4" method="post">
+  <div class="form-group">
+    <label for="phrase">Phrase:</label>
+    <input type="text" name="phrase" class="form-control">
+  </div>
+  <div class="form-group">
+    <label for="letters">Letters</label>
+    <input type="text" name="letters" value="" class="form-control">
+  </div>
+<p>When you're ready, click this button!</p>
+<button type="submit" class="btn btn-outline-info">Do it!</button>
+</form>
+
 
 {% endblock %}

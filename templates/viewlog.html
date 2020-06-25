@@ -4,8 +4,15 @@
 
 <h2>{{ the_title }}</h2>
 <h2>{{ error_mess }}</h2>
+    <nav class="nav pb-2">
+        <a href="#bottom" id="top" role="button" class="btn btn-outline-info btn-sm">skip to bottom</a>
+    </nav>
 
+     <nav class="nav pb-2">
+        <a href='/entry' role="button" class="btn btn-outline-info btn-sm float-right">Back to main page</a>
+    </nav>
 <table>
+
     <tr>
         {% for row_title in the_row_titles %} <!--no need ':'in jinja2 '%' is the delimiter -->
             <th>{{row_title}}</th>
@@ -19,5 +26,9 @@
         </tr>
     {% endfor %}
 </table>
+    <nav class="nav pt-2">
+        <a href="#top" id="bottom" role="button" class="btn btn-outline-info btn-sm">skip to top</a>
+    </nav>
+
 
 {% endblock %}
