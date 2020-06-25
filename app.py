@@ -165,6 +165,7 @@ def view_the_log() -> 'html': # function returns a html
                                     the_row_titles=titles,       # 2
                                     the_data=contents,)          # 3
 
+
     except ConnectionError as err:
         # in ConnectionError we specifically instructed the exception handler...
         # to look for InterfaceError which occurs when connection to database fails.
