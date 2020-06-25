@@ -1,7 +1,18 @@
+html {
+  background:       url(gradient.jpg) no-repeat center center fixed;
+  background-color: rgba(255, 255, 255, 0.6);
+  background-blend-mode: lighten;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 body {
   font-family:     'Raleway', Arial, Helvetica, sans-serif;
+  color:            #2a2a2a;
+  background-color: rgba(255, 255, 255, 0.6);
   font-size:        medium;
-  background-image: url(../src/gradient.jpg);
   margin-top:       5%;
   margin-bottom:    5%;
   margin-left:      10%;
@@ -44,6 +55,7 @@ td, th {
 .confirmentry {
   font-weight:      600;
 }
+
 
 /*** Tables ***/
 
