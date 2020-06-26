@@ -52,8 +52,12 @@ app.config['dbconfig'] = {'host':'127.0.0.1', # 1)IP address/"host" running MySQ
 # 8)to check sql table
 #   8.a)refer to step 1.1.c
 #   8.b)type -> use 'subDataBaseName'
-#   8.c)type -> select * from 'subTableName'
-# 9)to exit -> quit
+#   8.c)type -> show tables;
+#   8.d)type -> select * from 'subTableName'
+# 9)delete from table
+#   9.a)clear all data from table -> truncate table 'subTableName'
+#   9.b)delete specific rows -> delete from log where id in (124,123);
+# 10)to exit -> quit
 
 # use mysql querries to answer database related questions...
 # 1) how many requests have been responded to?
